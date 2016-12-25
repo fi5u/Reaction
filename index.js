@@ -9,13 +9,18 @@ function turnLightsOff() {
 }
 
 function turnGameOn() {
-    gameOn = true;
-    flashLights();
-    console.log(fastestTime ? 'Current fastest time: ' + fastestTime.toFixed(2) : 'No fastest time yet');
-
     setTimeout(function() {
-        startRandomCountdown();
-    }, 1000);
+        // Ensure we're not trying to reset the game
+        if(digitalRead(BTN) === 1) { return; }
+
+        gameOn = true;
+        flashLights();
+        console.log(fastestTime ? 'Current fastest time: ' + fastestTime.toFixed(2) : 'No fastest time yet');
+
+        setTimeout(function() {
+            startRandomCountdown();
+        }, 1000);
+    }, 100);
 }
 
 function startRandomCountdown() {
@@ -67,8 +72,33 @@ function endGame() {
     gameOn = false;
 }
 
+function resetGame() {
+    console.log('Resetting game');
+    endGame();
+    fastestTime = null;
+}
+
+function detectLongPress() {
+    var resetGameTimeoutCleared = false;
+    var resetGameTimeout = setTimeout(function() {
+        resetGameTimeoutCleared = true;
+        endFlash(LED3, 200, 12);
+        resetGame();
+    }, 3000);
+
+    var resetGameInterval = setInterval(function() {
+        if(digitalRead(BTN) === 0) {
+            clearTimeout(resetGameInterval);
+            if(!resetGameTimeoutCleared) {
+                clearTimeout(resetGameTimeout);
+            }
+        }
+    }, 50);
+}
+
 setWatch(function() {
     var reactionTime;
+    detectLongPress();
     if(!gameOn) {
         turnGameOn();
     }
@@ -76,12 +106,10 @@ setWatch(function() {
         reactionStopTime = new Date();
         reactionTime = reactionStopTime - reactionStartTime;
         if(!fastestTime || reactionTime < fastestTime) {
-            setTimeout(function() {
-                console.log('New fastest time: ' + reactionTime.toFixed(2));
-                endFlash(LED2, 200, 12);
-                fastestTime = reactionTime;
-                endGame();
-            }, 100);
+            console.log('New fastest time: ' + reactionTime.toFixed(2));
+            endFlash(LED2, 200, 12);
+            fastestTime = reactionTime;
+            endGame();
         }
         else {
             console.log('Lost');
