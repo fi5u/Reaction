@@ -12,60 +12,27 @@ function turnGameOn() {
     setTimeout(function() {
         // Ensure we're not trying to reset the game
         if(digitalRead(BTN) === 1) { return; }
-
         gameOn = true;
-        flashLights();
+        led(leds, 1, 100, 20);
         console.log(fastestTime ? 'Current fastest time: ' + fastestTime.toFixed(2) : 'No fastest time yet');
 
         setTimeout(function() {
             startRandomCountdown();
         }, 1000);
-    }, 100);
+    }, 200);
 }
 
 function startRandomCountdown() {
     var randomTime = Math.round(Math.random() * 12000);
     setTimeout(function() {
         if(!gameOn) { return; }
-        flashLight(LED3);
+        startReactionTime();
+        led(LED3, 1, 50);
     }, randomTime);
-}
-
-function flashLights() {
-    var ledIndex = 0;
-    var flashInterval = setInterval(function() {
-        turnLightsOff();
-        digitalWrite(leds[ledIndex], 1);
-        ledIndex++;
-        if(ledIndex >= leds.length) {
-            turnLightsOff();
-            clearInterval(flashInterval);
-        }
-    }, 200);
-}
-
-function flashLight(led) {
-    digitalWrite(led, 1);
-    startReactionTime();
-    setTimeout(function() {
-        digitalWrite(led, 0);
-    }, 50);
 }
 
 function startReactionTime() {
     reactionStartTime = new Date();
-}
-
-function endFlash(led, duration, times) {
-    var ledIndex = 0;
-    var flashTimeout = setInterval(function() {
-        var ledValue = ledIndex % 2 === 0 ? 0 : 1;
-        digitalWrite(led, ledValue);
-        ledIndex++;
-        if(ledIndex > times) {
-            clearInterval(flashTimeout);
-        }
-    }, duration);
 }
 
 function endGame() {
@@ -82,7 +49,7 @@ function detectLongPress() {
     var resetGameTimeoutCleared = false;
     var resetGameTimeout = setTimeout(function() {
         resetGameTimeoutCleared = true;
-        endFlash(LED3, 200, 12);
+        led(LED3, 4, 300, 200);
         resetGame();
     }, 3000);
 
@@ -96,6 +63,42 @@ function detectLongPress() {
     }, 50);
 }
 
+function led(leds, times, durOn, durOff) {
+    var i = 0;
+    var x = 0;
+    if(!Array.isArray(leds)) {
+        leds = [leds];
+    }
+
+    function singleLoop(arr, callback) {
+        digitalWrite(arr[i], 1);
+        setTimeout(function() {
+            digitalWrite(arr[i], 0);
+            setTimeout(function() {
+                i++;
+                if(i < arr.length) {
+                    singleLoop(arr, callback);
+                }
+                else {
+                    i = 0;
+                    callback();
+                }
+            },  durOff || durOn);
+        }, durOn);
+    }
+
+    function loop(arr) {
+        singleLoop(arr, function() {
+            x++;
+            if(x < times) {
+                loop(arr);
+            }
+        });
+    }
+
+    loop(leds);
+}
+
 setWatch(function() {
     var reactionTime;
     detectLongPress();
@@ -107,13 +110,13 @@ setWatch(function() {
         reactionTime = reactionStopTime - reactionStartTime;
         if(!fastestTime || reactionTime < fastestTime) {
             console.log('New fastest time: ' + reactionTime.toFixed(2));
-            endFlash(LED2, 200, 12);
+            led(LED2, 3, 300, 150);
             fastestTime = reactionTime;
             endGame();
         }
         else {
             console.log('Lost');
-            endFlash(LED1, 20, 10);
+            led(LED1, 4, 100);
             endGame();
         }
     }
