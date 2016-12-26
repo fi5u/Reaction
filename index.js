@@ -1,123 +1,123 @@
-const leds = [LED1, LED2, LED3];
-let gameOn = false;
-let fastestTime;
-let reactionStartTime;
-let reactionStopTime;
+const leds = [LED1, LED2, LED3]
+let gameOn = false
+let fastestTime
+let reactionStartTime
+let reactionStopTime
 
 function turnLightsOff() {
-    digitalWrite(leds, 0);
+    digitalWrite(leds, 0)
 }
 
 function turnGameOn() {
     setTimeout(() => {
         // Ensure we're not trying to reset the game
-        if(digitalRead(BTN) === 1) { return; }
-        gameOn = true;
-        led(leds, 1, 100, 20);
-        console.log(fastestTime ? 'Current fastest time: ' + fastestTime.toFixed(2) : 'No fastest time yet');
+        if(digitalRead(BTN) === 1) { return }
+        gameOn = true
+        led(leds, 1, 100, 20)
+        console.log(fastestTime ? 'Current fastest time: ' + fastestTime.toFixed(2) : 'No fastest time yet')
 
         setTimeout(() => {
-            startRandomCountdown();
-        }, 1000);
-    }, 200);
+            startRandomCountdown()
+        }, 1000)
+    }, 200)
 }
 
 function startRandomCountdown() {
-    const randomTime = Math.round(Math.random() * 12000);
+    const randomTime = Math.round(Math.random() * 12000)
     setTimeout(() => {
-        if(!gameOn) { return; }
-        startReactionTime();
-        led(LED3, 1, 50);
-    }, randomTime);
+        if(!gameOn) { return }
+        startReactionTime()
+        led(LED3, 1, 50)
+    }, randomTime)
 }
 
 function startReactionTime() {
-    reactionStartTime = new Date();
+    reactionStartTime = new Date()
 }
 
 function endGame() {
-    gameOn = false;
+    gameOn = false
 }
 
 function resetGame() {
-    console.log('Resetting game');
-    endGame();
-    fastestTime = null;
+    console.log('Resetting game')
+    endGame()
+    fastestTime = null
 }
 
 function detectLongPress() {
-    let resetGameTimeoutCleared = false;
+    let resetGameTimeoutCleared = false
     const resetGameTimeout = setTimeout(() => {
-        resetGameTimeoutCleared = true;
-        led(LED3, 4, 300, 200);
-        resetGame();
-    }, 3000);
+        resetGameTimeoutCleared = true
+        led(LED3, 4, 300, 200)
+        resetGame()
+    }, 3000)
 
     const resetGameInterval = setInterval(() => {
         if(digitalRead(BTN) === 0) {
-            clearTimeout(resetGameInterval);
+            clearTimeout(resetGameInterval)
             if(!resetGameTimeoutCleared) {
-                clearTimeout(resetGameTimeout);
+                clearTimeout(resetGameTimeout)
             }
         }
-    }, 50);
+    }, 50)
 }
 
 function led(leds, times, durOn, durOff) {
-    let i = 0;
-    let x = 0;
+    let i = 0
+    let x = 0
     if(!Array.isArray(leds)) {
-        leds = [leds];
+        leds = [leds]
     }
 
     function singleLoop(arr, callback) {
-        digitalWrite(arr[i], 1);
+        digitalWrite(arr[i], 1)
         setTimeout(() => {
-            digitalWrite(arr[i], 0);
+            digitalWrite(arr[i], 0)
             setTimeout(() => {
-                i++;
+                i++
                 if(i < arr.length) {
-                    singleLoop(arr, callback);
+                    singleLoop(arr, callback)
                 }
                 else {
-                    i = 0;
-                    callback();
+                    i = 0
+                    callback()
                 }
-            },  durOff || durOn);
-        }, durOn);
+            },  durOff || durOn)
+        }, durOn)
     }
 
     function loop(arr) {
         singleLoop(arr, () => {
-            x++;
+            x++
             if(x < times) {
-                loop(arr);
+                loop(arr)
             }
-        });
+        })
     }
 
-    loop(leds);
+    loop(leds)
 }
 
 setWatch(() => {
-    let reactionTime;
-    detectLongPress();
+    let reactionTime
+    detectLongPress()
     if(!gameOn) {
-        turnGameOn();
+        turnGameOn()
     }
     else {
-        reactionStopTime = new Date();
-        reactionTime = reactionStopTime - reactionStartTime;
+        reactionStopTime = new Date()
+        reactionTime = reactionStopTime - reactionStartTime
         if(!fastestTime || reactionTime < fastestTime) {
-            console.log('New fastest time: ' + reactionTime.toFixed(2));
-            led(LED2, 3, 300, 150);
-            fastestTime = reactionTime;
-            endGame();
+            console.log('New fastest time: ' + reactionTime.toFixed(2))
+            led(LED2, 3, 300, 150)
+            fastestTime = reactionTime
+            endGame()
         }
         else {
-            console.log('Lost');
-            led(LED1, 4, 100);
-            endGame();
+            console.log('Lost')
+            led(LED1, 4, 100)
+            endGame()
         }
     }
-}, BTN, {edge:'rising', debounce:50, repeat:true});
+}, BTN, {edge:'rising', debounce:50, repeat:true})
