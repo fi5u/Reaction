@@ -9,14 +9,14 @@ function turnLightsOff() {
 }
 
 function turnGameOn() {
-    setTimeout(function() {
+    setTimeout(() => {
         // Ensure we're not trying to reset the game
         if(digitalRead(BTN) === 1) { return; }
         gameOn = true;
         led(leds, 1, 100, 20);
         console.log(fastestTime ? 'Current fastest time: ' + fastestTime.toFixed(2) : 'No fastest time yet');
 
-        setTimeout(function() {
+        setTimeout(() => {
             startRandomCountdown();
         }, 1000);
     }, 200);
@@ -24,7 +24,7 @@ function turnGameOn() {
 
 function startRandomCountdown() {
     const randomTime = Math.round(Math.random() * 12000);
-    setTimeout(function() {
+    setTimeout(() => {
         if(!gameOn) { return; }
         startReactionTime();
         led(LED3, 1, 50);
@@ -47,13 +47,13 @@ function resetGame() {
 
 function detectLongPress() {
     let resetGameTimeoutCleared = false;
-    const resetGameTimeout = setTimeout(function() {
+    const resetGameTimeout = setTimeout(() => {
         resetGameTimeoutCleared = true;
         led(LED3, 4, 300, 200);
         resetGame();
     }, 3000);
 
-    const resetGameInterval = setInterval(function() {
+    const resetGameInterval = setInterval(() => {
         if(digitalRead(BTN) === 0) {
             clearTimeout(resetGameInterval);
             if(!resetGameTimeoutCleared) {
@@ -72,9 +72,9 @@ function led(leds, times, durOn, durOff) {
 
     function singleLoop(arr, callback) {
         digitalWrite(arr[i], 1);
-        setTimeout(function() {
+        setTimeout(() => {
             digitalWrite(arr[i], 0);
-            setTimeout(function() {
+            setTimeout(() => {
                 i++;
                 if(i < arr.length) {
                     singleLoop(arr, callback);
@@ -88,7 +88,7 @@ function led(leds, times, durOn, durOff) {
     }
 
     function loop(arr) {
-        singleLoop(arr, function() {
+        singleLoop(arr, () => {
             x++;
             if(x < times) {
                 loop(arr);
@@ -99,7 +99,7 @@ function led(leds, times, durOn, durOff) {
     loop(leds);
 }
 
-setWatch(function() {
+setWatch(() => {
     let reactionTime;
     detectLongPress();
     if(!gameOn) {
