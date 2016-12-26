@@ -2,7 +2,6 @@ const leds = [LED1, LED2, LED3]
 let gameOn = false
 let fastestTime
 let reactionStartTime
-let reactionStopTime
 
 function turnLightsOff() {
     digitalWrite(leds, 0)
@@ -14,7 +13,7 @@ function turnGameOn() {
         if(digitalRead(BTN) === 1) { return }
         gameOn = true
         led(leds, 1, 100, 20)
-        console.log(fastestTime ? 'Current fastest time: ' + fastestTime.toFixed(2) : 'No fastest time yet')
+        console.log(fastestTime ? `Current fastest time: ${fastestTime.toFixed(2)}` : 'No fastest time yet')
 
         setTimeout(() => {
             startRandomCountdown()
@@ -26,13 +25,9 @@ function startRandomCountdown() {
     const randomTime = Math.round(Math.random() * 12000)
     setTimeout(() => {
         if(!gameOn) { return }
-        startReactionTime()
+        reactionStartTime = new Date()
         led(LED3, 1, 50)
     }, randomTime)
-}
-
-function startReactionTime() {
-    reactionStartTime = new Date()
 }
 
 function endGame() {
@@ -106,10 +101,9 @@ setWatch(() => {
         turnGameOn()
     }
     else {
-        reactionStopTime = new Date()
-        reactionTime = reactionStopTime - reactionStartTime
+        reactionTime = new Date() - reactionStartTime
         if(!fastestTime || reactionTime < fastestTime) {
-            console.log('New fastest time: ' + reactionTime.toFixed(2))
+            console.log(`New fastest time: ${reactionTime.toFixed(2)}`)
             led(LED2, 3, 300, 150)
             fastestTime = reactionTime
             endGame()
@@ -120,4 +114,4 @@ setWatch(() => {
             endGame()
         }
     }
-}, BTN, {edge:'rising', debounce:50, repeat:true})
+}, BTN, {edge: 'rising', debounce: 50, repeat: true})
