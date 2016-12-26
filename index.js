@@ -1,8 +1,8 @@
-var gameOn = false;
-var leds = [LED1, LED2, LED3];
-var fastestTime;
-var reactionStartTime;
-var reactionStopTime;
+const leds = [LED1, LED2, LED3];
+let gameOn = false;
+let fastestTime;
+let reactionStartTime;
+let reactionStopTime;
 
 function turnLightsOff() {
     digitalWrite(leds, 0);
@@ -23,7 +23,7 @@ function turnGameOn() {
 }
 
 function startRandomCountdown() {
-    var randomTime = Math.round(Math.random() * 12000);
+    const randomTime = Math.round(Math.random() * 12000);
     setTimeout(function() {
         if(!gameOn) { return; }
         startReactionTime();
@@ -46,14 +46,14 @@ function resetGame() {
 }
 
 function detectLongPress() {
-    var resetGameTimeoutCleared = false;
-    var resetGameTimeout = setTimeout(function() {
+    let resetGameTimeoutCleared = false;
+    const resetGameTimeout = setTimeout(function() {
         resetGameTimeoutCleared = true;
         led(LED3, 4, 300, 200);
         resetGame();
     }, 3000);
 
-    var resetGameInterval = setInterval(function() {
+    const resetGameInterval = setInterval(function() {
         if(digitalRead(BTN) === 0) {
             clearTimeout(resetGameInterval);
             if(!resetGameTimeoutCleared) {
@@ -64,8 +64,8 @@ function detectLongPress() {
 }
 
 function led(leds, times, durOn, durOff) {
-    var i = 0;
-    var x = 0;
+    let i = 0;
+    let x = 0;
     if(!Array.isArray(leds)) {
         leds = [leds];
     }
@@ -100,7 +100,7 @@ function led(leds, times, durOn, durOff) {
 }
 
 setWatch(function() {
-    var reactionTime;
+    let reactionTime;
     detectLongPress();
     if(!gameOn) {
         turnGameOn();
