@@ -106,12 +106,11 @@ setWatch(() => {
             console.log(`New fastest time: ${reactionTime.toFixed(2)}`)
             led(LED2, 3, 300, 150)
             fastestTime = reactionTime
-            endGame()
         }
         else {
             console.log('Lost')
             led(LED1, 4, 100)
-            endGame()
         }
+        endGame()
     }
 }, BTN, {edge: 'rising', debounce: 50, repeat: true})
